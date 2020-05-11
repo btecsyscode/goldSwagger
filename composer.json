@@ -1,5 +1,6 @@
 {
-	"name": "btecsys/goldswagger",
+    "name": "btecsys/goldswagger",
+    "version": "1.0",
 	"type": "project",
 	"homepage": "http://www.buonny.com.br",
 	"keywords": ["btecsys", "swagger", "goldswagger"],
