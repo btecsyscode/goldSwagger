@@ -1,0 +1,361 @@
+<?php
+
+    /*
+
+    @group->swagger Logistico
+
+    */
+
+    error_reporting(E_ERROR | E_PARSE);
+
+	$options = getopt("a:");
+
+    if($options['a'] == ''){
+
+        $GLOBALS['api'] = '';
+
+        dirReader();
+    }
+    else{
+
+        $GLOBALS['api'] = $options['a'];
+
+        $GLOBALS['config'] = 0;
+        mkdir("../webroot/documentation", 0777);
+        mkdir("../webroot/documentation/yaml", 0777);
+        mkdir("../webroot/documentation/yaml/backup", 0777);
+
+        initGoldbachSwaggerGenerator($GLOBALS['api']);
+
+    }
+
+
+
+    function display($value){
+        echo "\n".$value;
+    }
+
+    function dirReader(){
+
+        display('Iniciando...');
+
+        $__DIR   = dirname(__FILE__);
+        $__FILES = scandir($__DIR);
+
+        display('Preparando scan de diretórios...');
+
+        //verifica se existe config
+        $GLOBALS['dir'] = basename(__DIR__);
+
+        $GLOBALS['config'] = 0;
+
+        foreach($__FILES as $__F){
+
+            $__DIRECTORY = clearLine($__F, ".");
+            if($__DIRECTORY){
+
+                if($__DIRECTORY == 'config'){
+                    $GLOBALS['config'] = 1;
+                }
+            }
+
+        }
+
+        if($GLOBALS['config'] == 0){
+
+            mkdir("../webroot/documentation", 0777);
+            mkdir("../webroot/documentation/yaml", 0777);
+            mkdir("../webroot/documentation/yaml/backup", 0777);
+
+            foreach($__FILES as $__F){
+
+                $__DIRECTORY = clearLine($__F, ".");
+                if($__DIRECTORY){
+                    display('');
+                    display('Verificando diretório '.$__DIRECTORY);
+                    initGoldbachSwaggerGenerator($__DIRECTORY);
+                }
+
+            }
+
+        }
+        else{
+
+            mkdir("../../webroot/documentation", 0777);
+            mkdir("../../webroot/documentation/yaml", 0777);
+            mkdir("../../webroot/documentation/yaml/backup", 0777);
+
+            initGoldbachSwaggerGenerator('');
+
+        }
+        display('');
+        display('Finalizando execução!');
+
+    }
+
+    function initGoldbachSwaggerGenerator($__DIRECTORY){
+
+        if($__DIRECTORY == ''){
+            $GLOBALS['dir'] = basename(__DIR__);
+        }
+        else{
+            $GLOBALS['dir'] = $__DIRECTORY;
+        }
+
+
+        $GLOBALS['routes'] = '';
+        $__GOLDPATH  = dirname(__FILE__).'/'.$__DIRECTORY.'/config/';
+
+        $__GOLDROUTE = 'routes.txt';
+        $__GOLDDIR   = dir($__GOLDPATH);
+
+        $__GOLDSCAN = scandir($__GOLDPATH);
+
+        $__GOLDROUTES = 0;
+
+        foreach($__GOLDSCAN as $__GOLDFILE){
+
+            if($__GOLDFILE == 'routes.php'){
+
+                $__GOLDROUTES = 1;
+
+                display('  Arquivo de rotas encontrado!');
+
+                $__GOLDEXPLODE = explode('.',$__GOLDFILE);
+                $__GOLDDESTINY = $__GOLDEXPLODE[0].".txt";
+
+                if(!copy($__GOLDPATH.'/'.$__GOLDFILE, $__GOLDPATH.'/'.$__GOLDDESTINY)){
+                   #Erro ao copiar arquivo
+                }
+
+            }
+
+        }
+
+        if($__GOLDROUTES == 1){
+
+            $__GOLDOPEN = $__GOLDPATH.$__GOLDROUTE;
+
+            if (!file_exists($__GOLDOPEN)){
+                # AQRUIVO NÃO ENCONTRADO;
+                echo "ERROR - Arquivo não encontrado";
+            }
+            else{
+
+                $fp = fopen($__GOLDOPEN, "r");
+
+                display('   Escaneando arquivo de rotas');
+                while (!feof($fp)){
+
+                    $current_line = fgets ($fp);
+
+                    $__GOLDGROUP = verifyGroup($current_line);
+
+                    if($__GOLDGROUP == ''){
+
+                        $__GOLD = goldreader($current_line);
+
+                    }
+                    else{
+
+                        $GLOBALS['subdir'] = $__GOLDGROUP;
+
+                    }
+
+                }
+
+                fclose($fp);
+
+            }
+
+            json_generator($GLOBALS['routes'], $__DIRECTORY);
+
+        }
+        else{
+
+            display('   Diretório não possui as especificações de configuração necessárias');
+        }
+
+    }
+
+    function verifyGroup($__LINE){
+
+        $__LINE = trim($__LINE);
+        $__SEARCHIT = '@group->swagger';
+        $__LINESEARCH_THIS = strpos( $__LINE, $__SEARCHIT);
+        if($__LINESEARCH_THIS !== false){
+
+            $__LINE = str_replace('@group->swagger','',$__LINE);
+            $__LINE = str_replace('//','',$__LINE);
+            $__LINE = str_replace('/*','',$__LINE);
+            $__LINE = str_replace('*/','',$__LINE);
+            $__LINE = str_replace('#','',$__LINE);
+            $__LINE = trim($__LINE);
+
+        }
+        else{
+
+            $__LINE = '';
+
+        }
+
+        return $__LINE;
+    }
+
+    function goldreader($__LINE){
+        $__LINE = clearLine($__LINE, "//");
+        if($__LINE != ""){
+            $__LINE = trim($__LINE);
+            $__SEARCHIT = '$routes->';
+            $__LINESEARCH_THIS = strpos( $__LINE, $__SEARCHIT);
+            if($__LINESEARCH_THIS !== false){
+                $__EXP = explode('->',$__LINE);
+                $__EXP = explode('(',$__EXP[1]);
+                $__METHOD = $__EXP[0];
+                $__EXP = explode("'",$__EXP[1]);
+                $__URL = $__EXP[1];
+                $__LINE = str_replace(" ",'',$__LINE);
+                $__EXP = explode("'controller'=>",$__LINE);
+                $__EXP = explode("'",$__EXP[1]);
+                $__CONTROLLER = str_replace("'",'',$__EXP[1]);
+                $__EXP = explode("'action'=>",$__LINE);
+                $__EXP = explode("'",$__EXP[1]);
+                $__ACTION = str_replace("'",'',$__EXP[1]);
+
+                if($__ACTION != ''){
+                    display('    - '.$__METHOD.' '.$__URL.' '.$__CONTROLLER);
+                    $GLOBALS['routes'][$__CONTROLLER][$__URL][$__METHOD] = $__ACTION;
+                }
+            }
+        }
+    }
+
+    function clearLine($__LINE, $__PARAM){
+        $__LINE = trim($__LINE);
+        $__SEARCHIT = $__PARAM;
+        $__LINESEARCH_THIS = strpos( $__LINE, $__SEARCHIT);
+        if($__LINESEARCH_THIS === false){
+            return $__LINE;
+        }
+    }
+
+    function json_generator($__GOLD, $__DIRECTORY){
+
+        $GLOBALS['routes'] = '';
+
+        $__INFO   = '';
+        $__TAGS   = '';
+        $__PATHS  = '';
+        $__EXTERN = '';
+
+        $__GOLDPATH  = $GLOBALS['dir'];
+
+        $GLOBALS['goldSwagger'] = '';
+
+        $GLOBALS['goldSwagger']['swagger'] = "2.0";
+
+        $GLOBALS['goldSwagger']['info'] = array(
+            "description" => $__GOLDPATH,
+            "version" => "1.0.0",
+            "title" => $__GOLDPATH
+        );
+
+        $GLOBALS['goldSwagger']['host']     = "localhost:8087";
+        $GLOBALS['goldSwagger']['basePath'] = "/api/v2";
+
+        $GLOBALS['goldSwagger']['schemes'] = array("https","http");
+
+        foreach($__GOLD as $__ITEM => $__KEY){
+            $GLOBALS['goldSwagger']['tags'][] = array(
+                "name"      => $__ITEM,
+                "description" => "API ".$__ITEM
+            );
+        }
+
+
+
+        foreach($__GOLD as $__ITEM => $__KEY){
+
+            foreach($__GOLD[$__ITEM] as $__URLKEY => $__URL){
+
+                foreach($__GOLD[$__ITEM][$__URLKEY] as $__METHODKEY => $METHOD){
+
+                    $GLOBALS['goldSwagger']['paths'][$__URLKEY][$__METHODKEY] = array(
+                        "tags"         => array($__ITEM),
+                        "summary"      => "Busca".$__ITEM,
+                        "description"  => "Busca".$__ITEM,
+                        "produces"     => array("application/json"),
+                        "responses"    => array(
+                            "200" => array(
+                                "description" => "successful operation",
+                            )
+                        )
+                    );
+                }
+            }
+        }
+
+        $GLOBALS['goldSwagger']['definitions'] = array(
+            "" => array(
+            )
+        );
+
+        $GLOBALS['goldSwagger']['externalDocs'] = array(
+            "description" => "Portal Buonny",
+            "url"         => "https://portal.buonny.com.br/portal/"
+        );
+
+        $js = json_encode($GLOBALS['goldSwagger']);
+
+
+
+        if($GLOBALS['config'] == 1){
+            $__GOLDPATH  = '../../webroot/documentation/yaml/';
+
+        }
+        else{
+            $__GOLDPATH  = '../webroot/documentation/yaml/';
+        }
+
+        if($GLOBALS['subdir'] != ''){
+
+            mkdir($__GOLDPATH.$GLOBALS['subdir'], 0777);
+            mkdir($__GOLDPATH.$GLOBALS['subdir'].'/backup', 0777);
+            $__GOLDPATH = $__GOLDPATH.$GLOBALS['subdir'].'/';
+
+        }
+
+        $GLOBALS['subdir'] = '';
+
+        $__DIR = scandir($__GOLDPATH);
+
+
+
+        $__ENDFILE = $GLOBALS['dir'].'.json';
+
+        $__DATE = date('ymdhis');
+
+        foreach($__DIR as $__DR){
+
+            if($__DR == $__ENDFILE){
+
+                if(!copy($__GOLDPATH.'/'.$__ENDFILE, $__GOLDPATH.'/backup/'.$__ENDFILE.$__DATE)){
+                    #Erro ao copiar arquivo
+                }
+            }
+        }
+
+        $myfile = fopen($__GOLDPATH.$GLOBALS['dir'].".json", "w") or die();
+        $txt = $js;
+        fwrite($myfile, $txt);
+        fclose($myfile);
+
+        display('   Gerando arquivo '.$__ENDFILE.' -> '.$__GOLDPATH.$__ENDFILE);
+
+        $__REMOVE = dirname(__FILE__).'/'.$__DIRECTORY.'/config/routes.txt';
+        unlink($__REMOVE);
+
+    }
+
+
+?>
