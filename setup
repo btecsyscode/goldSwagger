@@ -1,16 +1,11 @@
 <?php
 
-    /*
-
-    @group->swagger Logistico
-
-    */
 
     error_reporting(E_ERROR | E_PARSE);
 
-    mkdir("../../webroot/documentation", 0777);
-    mkdir("../../webroot/documentation/yaml", 0777);
-    mkdir("../../webroot/documentation/yaml/backup", 0777);
+    mkdir("../../../webroot/documentation", 0777);
+    mkdir("../../../webroot/documentation/yaml", 0777);
+    mkdir("../../../webroot/documentation/yaml/backup", 0777);
 
 	$options = getopt("a:");
 
@@ -43,7 +38,7 @@
 
         display('Iniciando...');
 
-        $__DIR   = "../../plugins";
+        $__DIR   = "../../../plugins";
         $__FILES = scandir($__DIR);
 
         display('Preparando scan de diretórios...');
@@ -67,9 +62,9 @@
 
         if($GLOBALS['config'] == 0){
 
-            mkdir("../webroot/documentation", 0777);
-            mkdir("../webroot/documentation/yaml", 0777);
-            mkdir("../webroot/documentation/yaml/backup", 0777);
+            mkdir("../../webroot/documentation", 0777);
+            mkdir("../../webroot/documentation/yaml", 0777);
+            mkdir("../../webroot/documentation/yaml/backup", 0777);
 
             foreach($__FILES as $__F){
 
@@ -85,9 +80,9 @@
         }
         else{
 
-            mkdir("../../webroot/documentation", 0777);
-            mkdir("../../webroot/documentation/yaml", 0777);
-            mkdir("../../webroot/documentation/yaml/backup", 0777);
+            mkdir("../../../webroot/documentation", 0777);
+            mkdir("../../../webroot/documentation/yaml", 0777);
+            mkdir("../../../webroot/documentation/yaml/backup", 0777);
 
             initGoldbachSwaggerGenerator('');
 
@@ -108,7 +103,7 @@
 
 
         $GLOBALS['routes'] = array();
-        $__GOLDPATH  = '../../plugins/'.$__DIRECTORY.'/config/';
+        $__GOLDPATH  = '../../../plugins/'.$__DIRECTORY.'/config/';
 
         $__GOLDROUTE = 'routes.txt';
         $__GOLDDIR   = dir($__GOLDPATH);
@@ -118,6 +113,7 @@
         $__GOLDROUTES = 0;
 
         foreach($__GOLDSCAN as $__GOLDFILE){
+
 
             if($__GOLDFILE == 'routes.php'){
 
@@ -139,6 +135,7 @@
         if($__GOLDROUTES == 1){
 
             $__GOLDOPEN = $__GOLDPATH.$__GOLDROUTE;
+
 
             if (!file_exists($__GOLDOPEN)){
                 # AQRUIVO NÃO ENCONTRADO;
@@ -176,7 +173,7 @@
 
         }
         else{
-            display('   Diretório não possui as especificações de configuração necessárias');
+            display('   Diretório '.$__DIRECTORY.' não foi encontrado ou não possui as especificações de configuração necessárias');
         }
 
     }
@@ -280,7 +277,7 @@
             foreach($__GOLD[$__ITEM] as $__URLKEY => $__URL){
 
                 foreach($__GOLD[$__ITEM][$__URLKEY] as $__METHODKEY => $METHOD){
-                  
+
                     $GLOBALS['goldSwagger']['paths'][$__URLKEY][$__METHODKEY] = array(
                         "tags"         => array($__ITEM),
                         "summary"      => "Busca".$__ITEM,
@@ -311,11 +308,11 @@
 
 
         if($GLOBALS['config'] == 1){
-            $__GOLDPATH  = '../../../webroot/documentation/yaml/';
+            $__GOLDPATH  = '../../../../webroot/documentation/yaml/';
 
         }
         else{
-            $__GOLDPATH  = '../../webroot/documentation/yaml/';
+            $__GOLDPATH  = '../../../webroot/documentation/yaml/';
         }
 
         if($GLOBALS['subdir'] != ''){
