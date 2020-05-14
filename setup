@@ -5,7 +5,8 @@
 
     mkdir("../../../webroot/documentation", 0777);
     mkdir("../../../webroot/documentation/yaml", 0777);
-    mkdir("../../../webroot/documentation/yaml/backup", 0777);
+    mkdir("../../../webroot/documentation/yaml/Outros", 0777);
+    mkdir("../../../webroot/documentation/yaml/Outros/backup", 0777);
 
 	$options = getopt("a:");
 
@@ -22,7 +23,8 @@
         $GLOBALS['config'] = 0;
         mkdir("../../../webroot/documentation", 0777);
         mkdir("../../../webroot/documentation/yaml", 0777);
-        mkdir("../../../webroot/documentation/yaml/backup", 0777);
+        mkdir("../../../webroot/documentation/yaml/Outros", 0777);
+        mkdir("../../../webroot/documentation/yaml/Outros/backup", 0777);
 
         initGoldbachSwaggerGenerator($GLOBALS['api']);
 
@@ -64,7 +66,8 @@
 
             mkdir("../../webroot/documentation", 0777);
             mkdir("../../webroot/documentation/yaml", 0777);
-            mkdir("../../webroot/documentation/yaml/backup", 0777);
+            mkdir("../../webroot/documentation/yaml/Outros", 0777);
+            mkdir("../../webroot/documentation/yaml/Outros/backup", 0777);
 
             foreach($__FILES as $__F){
 
@@ -82,7 +85,8 @@
 
             mkdir("../../../webroot/documentation", 0777);
             mkdir("../../../webroot/documentation/yaml", 0777);
-            mkdir("../../../webroot/documentation/yaml/backup", 0777);
+            mkdir("../../../webroot/documentation/yaml/Outros", 0777);
+            mkdir("../../../webroot/documentation/yaml/Outros/backup", 0777);
 
             initGoldbachSwaggerGenerator('');
 
@@ -321,6 +325,9 @@
             mkdir($__GOLDPATH.$GLOBALS['subdir'].'/backup', 0777);
             $__GOLDPATH = $__GOLDPATH.$GLOBALS['subdir'].'/';
 
+        }
+        else{
+            $__GOLDPATH = $__GOLDPATH.'/Outros/';
         }
 
         $GLOBALS['subdir'] = '';
